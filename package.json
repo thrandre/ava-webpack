@@ -1,0 +1,19 @@
+{
+  "name": "ava-webpack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "bin": "cli.js",
+  "dependencies": {
+    "ava": "^0.15.2",
+    "cuid": "^1.3.8",
+    "findup-sync": "^0.4.1",
+    "node-glob": "^1.2.0",
+    "rimraf": "^2.5.3",
+    "webpack": "^1.13.1",
+    "webpack-node-externals": "^1.2.0"
+  }
+}
