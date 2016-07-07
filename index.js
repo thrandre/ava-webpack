@@ -1,12 +1,14 @@
-const path = require('path');
-const webpack = require('webpack');
-const glob = require('glob');
-const findup = require('findup-sync');
-const cuid = require('cuid');
-const rimraf = require('rimraf');
-const nodeExternals = require('webpack-node-externals');
+var path = require('path');
+var webpack = require('webpack');
+var glob = require('glob');
+var findup = require('findup-sync');
+var cuid = require('cuid');
+var rimraf = require('rimraf');
+var nodeExternals = require('webpack-node-externals');
+var objectAssign = require('object-assign');
+var Promise = require('bluebird');
 
-const { exec } = require('child_process');
+var exec = require('child_process').exec;
 
 function findWebpackConfig() {
 	return findup("webpack.config.js");
@@ -26,7 +28,7 @@ function getFileNameFromPath(filePath) {
 }
 
 function getFileHash(files) {
-	return files.reduce((prev, next) => {
+	return files.reduce(function (prev, next) {
 		prev[getFileNameFromPath(next)] = "./" + next;
 		return prev;
 	}, {});
@@ -37,7 +39,7 @@ function generateRunId() {
 }
 
 function getWebpackConfig(config, fileHash, path) {
-	return Object.assign({}, config, {
+	return objectAssign({}, config, {
 		entry: fileHash,
 		output: {
 			filename: '[name].test.js',
@@ -49,8 +51,8 @@ function getWebpackConfig(config, fileHash, path) {
 }
 
 function runWebpack(config) {
-	return new Promise((resolve, reject) => {
-		webpack(config).run((err, stats) => {
+	return new Promise(function (resolve, reject) {
+		webpack(config).run(function (err, stats) {
 			if(err) {
 				reject(err);
 				return;
@@ -62,8 +64,8 @@ function runWebpack(config) {
 }
 
 function runAva(outDir) {
-	return new Promise((resolve, reject) => {
-		exec(`ava ${ outDir }/**/*.test.js`, (err, stdout, stderr) => {
+	return new Promise(function (resolve, reject) {
+		exec('ava ' + outDir + '/**/*.test.js', function (err, stdout, stderr) {
 			if(err) {
 				reject(stderr);
 				return;
@@ -90,15 +92,15 @@ function complete(output, isError = false, shouldClean) {
 }
 
 function run(input, flags, showHelp) {
-	const webpackConfigPath =  flags.webpackConfig || findWebpackConfig();
-	const webpackConfigResolvedPath = webpackConfigPath && path.resolve(process.cwd(), webpackConfigPath);
+	var webpackConfigPath =  flags.webpackConfig || findWebpackConfig();
+	var webpackConfigResolvedPath = webpackConfigPath && path.resolve(process.cwd(), webpackConfigPath);
 	
-	const testDiscoveryPattern = input || '**/*.test.{js,jsx,ts,tsx}';
+	var testDiscoveryPattern = input || '**/*.test.{js,jsx,ts,tsx}';
 
-	const runId = generateRunId();
-	const outDir = `./.ava-webpack/${ runId }`;
+	var runId = generateRunId();
+	var outDir = './.ava-webpack/' + runId;
 
-	let existingWebpackConfig = {};
+	var existingWebpackConfig = {};
 	
 	if(webpackConfigPath) {
 		try {
@@ -109,19 +111,20 @@ function run(input, flags, showHelp) {
 		}
 	}
 
-	const webpackConfig = getWebpackConfig(
+	var webpackConfig = getWebpackConfig(
 		existingWebpackConfig,
 		getFileHash(getFiles(testDiscoveryPattern)),
 		outDir
 	);
 
 	runWebpack(webpackConfig).then(
-		webpackRes => runAva(outDir)
-			.then(
-				res => complete(res, false, flags.clean),
-				err => complete(err, true, flags.clean)
-			),
-			err => complete(err, true, flags.clean)
+		function(webpackRes) {
+			runAva(outDir).then(
+				function(res) { complete(res, false, flags.clean); },
+				function(err) { complete(err, true, flags.clean); }
+			)
+		},
+		function(err) { complete(err, true, flags.clean); }
 	);
 }
 
