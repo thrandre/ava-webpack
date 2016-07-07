@@ -76,7 +76,7 @@ function runAva(outDir) {
 	});
 }
 
-function complete(output, isError = false, shouldClean) {
+function complete(output, isError, shouldClean) {
 	if(shouldClean) {
 		rimraf.sync('.ava-webpack');
 	}
