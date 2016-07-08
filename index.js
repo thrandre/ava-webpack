@@ -8,7 +8,7 @@ var nodeExternals = require('webpack-node-externals');
 var objectAssign = require('object-assign');
 var Promise = require('bluebird');
 
-var exec = require('child_process').exec;
+var exec = require('npm-run').exec;
 
 function findWebpackConfig() {
 	return findup("webpack.config.js");
@@ -65,13 +65,15 @@ function runWebpack(config) {
 
 function runAva(outDir, tap) {
 	return new Promise(function (resolve, reject) {
-		exec('ava ' + outDir + '/**/*.test.js' + tap ? ' --tap' : '', function (err, stdout, stderr) {
+		exec('ava ' + (tap ? '--tap ' : '') + outDir + '/**/*.test.js', {},  function (err, stdout, stderr) {
+			var output = tap ? stdout : stderr;
+
 			if(err) {
-				reject(stderr);
+				reject(output);
 				return;
 			}
 
-			resolve(stdout || stderr);
+			resolve(output);
 		});
 	});
 }
@@ -82,7 +84,7 @@ function complete(output, isError, shouldClean) {
 	}
 
 	if(isError) {
-		console.error(output);
+		console.log(output);
 		process.exit(1);
 		return;
 	}
