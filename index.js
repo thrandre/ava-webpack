@@ -63,9 +63,9 @@ function runWebpack(config) {
 	});
 }
 
-function runAva(outDir) {
+function runAva(outDir, tap) {
 	return new Promise(function (resolve, reject) {
-		exec('ava ' + outDir + '/**/*.test.js', function (err, stdout, stderr) {
+		exec('ava ' + outDir + '/**/*.test.js' + tap ? ' --tap' : '', function (err, stdout, stderr) {
 			if(err) {
 				reject(stderr);
 				return;
@@ -119,7 +119,7 @@ function run(input, flags, showHelp) {
 
 	runWebpack(webpackConfig).then(
 		function(webpackRes) {
-			runAva(outDir).then(
+			runAva(outDir, flags.tap).then(
 				function(res) { complete(res, false, flags.clean); },
 				function(err) { complete(err, true, flags.clean); }
 			)
