@@ -71,7 +71,7 @@ function runAva(outDir, tap) {
 				return;
 			}
 
-			resolve(stderr);
+			resolve(stdout || stderr);
 		});
 	});
 }
