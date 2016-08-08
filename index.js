@@ -27,9 +27,10 @@ function getFileNameFromPath(filePath) {
 		.join('_');
 }
 
-function getFileHash(files) {
+function getFileHash(files, polyfillPath) {
 	return files.reduce(function (prev, next) {
-		prev[getFileNameFromPath(next)] = "./" + next;
+		var path = "./" + next;
+		prev[getFileNameFromPath(next)] = polyfillPath ? [ polyfillPath, path ] : path;
 		return prev;
 	}, {});
 }
@@ -115,7 +116,7 @@ function run(input, flags, showHelp) {
 
 	var webpackConfig = getWebpackConfig(
 		existingWebpackConfig,
-		getFileHash(getFiles(testDiscoveryPattern)),
+		getFileHash(getFiles(testDiscoveryPattern), flags.polyfill),
 		outDir
 	);
 

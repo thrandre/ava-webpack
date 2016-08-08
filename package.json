@@ -1,12 +1,20 @@
 {
   "name": "ava-webpack",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "",
   "main": "index.js",
   "scripts": {},
-  "author": "",
+  "author": {
+	  "name": "Thomas Andresen",
+	  "email": "thomas@ndrsn.no"
+  },
+  "url": "https://github.com/thrandre/ava-webpack/issues",
   "license": "ISC",
   "bin": "cli.js",
+  "repository": { 
+	"type": "git",
+	"url": "https://github.com/thrandre/ava-webpack.git"
+  },
   "dependencies": {
     "ava": "^0.15.2",
     "bluebird": "^3.4.1",
