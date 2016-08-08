@@ -8,7 +8,7 @@ npm install ava-webpack --save-dev
 
 ## Usage example (almost as crude as the implementation)
 
-*webpack.config-test.js* (using [awesome-typescript-loader](https://github.com/s-panferov/awesome-typescript-loader)
+*webpack.config-test.js* (using [awesome-typescript-loader](https://github.com/s-panferov/awesome-typescript-loader))
 
 ```
 var path = require('path');
