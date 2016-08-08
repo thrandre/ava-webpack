@@ -19,10 +19,7 @@ module.exports = {
 			path.resolve(__dirname, 'apps'),
 			path.resolve(__dirname, 'common')
 		],
-		extensions: ['', '.ts', '.tsx', '.js'],
-		alias: {
-			"udir-common": path.join(__dirname, './common')
-		}
+		extensions: ['', '.ts', '.tsx', '.js']
 	},
 	devtool: 'eval',
 	module: {
