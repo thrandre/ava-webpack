@@ -1,4 +1,6 @@
-# Crude webpack-enabled runner for AVA
+# ava-webpack
+
+> Crude webpack enabled runner for AVA
 
 ## Installation
 
@@ -6,7 +8,7 @@
 npm install ava-webpack --save-dev
 ```
 
-## Usage example (almost as crude as the implementation)
+## Usage example (almost as crude as the implementation - sorry)
 
 *webpack.config-test.js* (using [awesome-typescript-loader](https://github.com/s-panferov/awesome-typescript-loader))
 

@@ -1,4 +1,5 @@
 var path = require('path');
+var fs = require('fs');
 var webpack = require('webpack');
 var glob = require('glob');
 var findup = require('findup-sync');
@@ -58,15 +59,14 @@ function runWebpack(config) {
 				reject(err);
 				return;
 			}
-
-			resolve(stats.toJson());
+			resolve(stats);
 		});
 	});
 }
 
-function runAva(outDir, tap) {
+function runAva(emittedFiles, tap) {
 	return new Promise(function (resolve, reject) {
-		exec('ava ' + (tap ? '--tap ' : '') + outDir + '/**/*.test.js', {},  function (err, stdout, stderr) {
+		exec('ava ' + (tap ? '--tap ' : '') + emittedFiles.join(' '), {},  function (err, stdout, stderr) {
 			var output = tap ? stdout : stderr;
 
 			if(err) {
@@ -105,6 +105,8 @@ function run(input, flags, showHelp) {
 
 	var existingWebpackConfig = {};
 	
+	var cleanOutput = !flags.debug || flags.clean;
+
 	if(webpackConfigPath) {
 		try {
 			existingWebpackConfig = require(webpackConfigResolvedPath);
@@ -115,26 +117,40 @@ function run(input, flags, showHelp) {
 		}
 	}
 
+	var testFiles = getFiles(testDiscoveryPattern);
+	var webpackEntries = getFileHash(testFiles, flags.polyfill);
+
 	var webpackConfig = getWebpackConfig(
 		existingWebpackConfig,
-		getFileHash(getFiles(testDiscoveryPattern), flags.polyfill),
+		webpackEntries,
 		outDir
 	);
 
 	runWebpack(webpackConfig).then(
-		function(webpackRes) {
-			if (webpackRes.errors.length > 0) {
-				for (var i = 0; i < webpackRes.errors.length; i++) {
-					console.error(webpackRes.errors[i]);
+		function(stats) {
+			var jsonStats = stats.toJson();
+
+			if (jsonStats.errors.length > 0) {
+				for (var i = 0; i < jsonStats.errors.length; i++) {
+					console.error(jsonStats.errors[i]);
 				}
-				return;
+				return complete(null, true, cleanOutput);
 			}
-			runAva(outDir, flags.tap).then(
-				function(res) { complete(res, false, flags.clean); },
-				function(err) { complete(err, true, flags.clean); }
+
+			var emittedFiles = jsonStats.assets.map(function(asset) {
+				return path.join(outDir, asset.name);
+			});
+
+			if(flags.debug) {
+				console.log(stats.toString({ colors: true }));
+			}
+
+			runAva(emittedFiles, flags.tap).then(
+				function(res) { return complete(res, false, cleanOutput); },
+				function(err) { return complete(err, true, cleanOutput); }
 			)
 		},
-		function(err) { complete(err, true, flags.clean); }
+		function(err) { return complete(err, true, cleanOutput); }
 	);
 }
 
