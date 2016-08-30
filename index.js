@@ -108,6 +108,7 @@ function run(input, flags, showHelp) {
 	if(webpackConfigPath) {
 		try {
 			existingWebpackConfig = require(webpackConfigResolvedPath);
+			existingWebpackConfig = existingWebpackConfig.default || existingWebpackConfig;
 		}
 		catch(e) {
 			console.error("Webpack config not found. Using default.");
@@ -122,6 +123,12 @@ function run(input, flags, showHelp) {
 
 	runWebpack(webpackConfig).then(
 		function(webpackRes) {
+			if (webpackRes.errors.length > 0) {
+				for (var i = 0; i < webpackRes.errors.length; i++) {
+					console.error(webpackRes.errors[i]);
+				}
+				return;
+			}
 			runAva(outDir, flags.tap).then(
 				function(res) { complete(res, false, flags.clean); },
 				function(err) { complete(err, true, flags.clean); }
